@@ -1,8 +1,12 @@
 from redbot.core import commands, checks, Config
+from redbot.cogs.audio.audio_dataclasses import LocalPath, Query
 import discord
 import logging
 import asyncio
 import random
+import lavalink
+import os
+import re
 
 log = logging.getLogger('red.ckriscogs')
 
@@ -166,9 +170,17 @@ class Ckriscog(commands.Cog):
         #
         #if message.author.bot:
         #    return
-        await self.check_fuck(message)
+        #await self.check_fuck(message)
         chan = message.channel
+            
         is_prune_channel = await self.config.channel(chan).prune_channel_messages()
+        if chan != 187792525258391552 and message.guild == 154442858525491201 and not is_prune_channel:
+            if re.match(r"^!(help|.{1,17} \d\d?)$"):
+                await asyncio.sleep(2)
+                msg = await message.channel.send("Please enter bot commands in #bot-stuff")
+                await self._delAfterTime([message, msg])
+                return
+        #
         if not is_prune_channel:
             return
         #
@@ -176,7 +188,34 @@ class Ckriscog(commands.Cog):
         del_delay = await self.config.channel(chan).prune_message_delay()
         await message.delete(delay=del_delay)
     #
-    
+    @commands.guild_only()
+    @commands.command()
+    async def base(self, ctx):
+        return
+        sender = ctx.author
+        sounddir = os.path.join(os.getcwd(), 'soundfiles')
+        myfile = os.path.join(sounddir, os.listdir(sounddir)[0])
+        if sender.voice is None or sender.voice.channel is None:
+            await ctx.send(f"You're not in any voice channel")
+            #log.info(f"Current directory: {os.getcwd()}")
+            return
+        audio = self.bot.get_cog("Audio")
+        failed = await ctx.invoke(audio.command_summon)
+        if failed:
+            return
+        lavaplayer = lavalink.get_player(ctx.guild.id)
+        #lavaplayer.store("channel", ctx.channel.id)
+        await lavaplayer.stop()
+        localfolder = LocalPath.joinpath(sounddir, '')
+        query = Query.process_input(sounddir,
+        track = load_result.tracks[0]
+        await lavaplayer.add(sender,track)
+        await lavaplayer.play()
+        
+        
+        
+        
+
     async def check_fuck(self, message: discord.Message):
         if 'fuck' in message.content.lower() and message.guild.id == 154442858525491201 and not message.author.bot:
             await message.channel.send(random.choice(['Watch your language, motherfucker', 'Calm the fuck down', 'Stop fucking around']))
