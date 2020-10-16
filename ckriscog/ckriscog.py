@@ -204,16 +204,16 @@ class Ckriscog(commands.Cog):
             return
         audio = self.bot.get_cog("Audio")
         failed = await ctx.invoke(audio.command_summon)
-        if failed:
+        if failed or True:
             return
-        lavaplayer = lavalink.get_player(ctx.guild.id)
-        #lavaplayer.store("channel", ctx.channel.id)
-        await lavaplayer.stop()
-        localfolder = LocalPath.joinpath(sounddir, '')
-        query = Query.process_input(sounddir,
-        track = load_result.tracks[0]
-        await lavaplayer.add(sender,track)
-        await lavaplayer.play()
+        #lavaplayer = lavalink.get_player(ctx.guild.id)
+        ##lavaplayer.store("channel", ctx.channel.id)
+        #await lavaplayer.stop()
+        #localfolder = LocalPath.joinpath(sounddir, '')
+        #query = Query.process_input(sounddir,
+        #track = load_result.tracks[0]
+        #await lavaplayer.add(sender,track)
+        #await lavaplayer.play()
         
         
         
