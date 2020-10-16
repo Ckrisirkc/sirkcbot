@@ -174,6 +174,7 @@ class Ckriscog(commands.Cog):
         chan = message.channel
             
         is_prune_channel = await self.config.channel(chan).prune_channel_messages()
+        log.info(f"on_message: {chan != 187792525258391552},{message.guild == 154442858525491201},{not is_prune_channel}")
         if chan != 187792525258391552 and message.guild == 154442858525491201 and not is_prune_channel:
             if message.author.bot and message.author != 196382897366761472:
                 await self._delAfterTime([message])
