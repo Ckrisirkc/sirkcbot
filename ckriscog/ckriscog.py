@@ -175,6 +175,9 @@ class Ckriscog(commands.Cog):
             
         is_prune_channel = await self.config.channel(chan).prune_channel_messages()
         if chan != 187792525258391552 and message.guild == 154442858525491201 and not is_prune_channel:
+            if message.author.bot and message.author != 196382897366761472:
+                await self._delAfterTime([message])
+                return
             if re.match(r"^!(help|.{1,17} \d\d?)$"):
                 await asyncio.sleep(2)
                 msg = await message.channel.send("Please enter bot commands in #bot-stuff")
