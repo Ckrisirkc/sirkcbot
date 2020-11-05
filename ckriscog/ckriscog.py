@@ -245,7 +245,7 @@ class Ckriscog(commands.Cog):
     async def what_is_ip(self, ctx):
         if not isinstance(ctx.channel, discord.abc.PrivateChannel):
             msg = await ctx.send('Only for use via DM!')
-            await self._delAfterTime([ctx, msg], 10)
+            await self._delAfterTime([ctx.message, msg], 10)
             return
         ip = None
         try:
