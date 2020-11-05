@@ -36,7 +36,7 @@ class Ckriscog(commands.Cog):
         for msg in msgs:
             try:
                 #await self.bot.delete_message(msg)
-                log.info(f'Deleting message by {msg.author}, content: {msg.content}')
+                log.info(f'Deleting message by {msg.author} in {msg.channel.name}, content: {msg.content}')
                 await msg.delete(delay=time)
             except discord.Forbidden:
                 log.debug("Cannot delete message, Forbidden")
@@ -46,12 +46,12 @@ class Ckriscog(commands.Cog):
                 log.debug('Delete failed')
     #
     
-    
-    @commands.guild_only()
     @commands.command()
-    @checks.admin_or_permissions(move_members=True)
+    @checks.has_permissions(move_members=True)
     async def massmove(self, ctx, from_channel: discord.VoiceChannel, to_channel: discord.VoiceChannel):
         """Massmove users to another voice channel"""
+        if isinstance(ctx.channel, discord.abc.PrivateChannel):
+            return
         await self._massmove(ctx, from_channel, to_channel)
 
     async def _massmove(self, ctx, from_channel, to_channel):
@@ -71,7 +71,7 @@ class Ckriscog(commands.Cog):
                 log.debug('Getting copy of current list to move')
                 voice_list = list(from_channel.members)
                 for member in voice_list:
-                    await member.edit(voice_channel = to_channel, reason=f'MassMove by {ctx.message.author}')
+                    await member.edit(voice_channel = to_channel, reason=f'MassMove {len(voice_list)} people by {ctx.message.author}')
                     log.debug('Member {} moved to channel {}'.format(member.id, to_channel.id))
                     await asyncio.sleep(0.05)
             except discord.Forbidden:
@@ -174,14 +174,16 @@ class Ckriscog(commands.Cog):
         chan = message.channel
             
         is_prune_channel = await self.config.channel(chan).prune_channel_messages()
-        log.info(f"on_message: {chan != 187792525258391552},{message.guild == 154442858525491201},{not is_prune_channel}")
-        if chan != 187792525258391552 and message.guild == 154442858525491201 and not is_prune_channel:
-            if message.author.bot and message.author != 196382897366761472:
+        #log.info(f"on_message: {chan != 187792525258391552},{message.guild == 154442858525491201},{not is_prune_channel}")
+        #log.info(f"Message guild: {message.guild}")
+        if chan.id != 187792525258391552 and message.guild.id == 154442858525491201 and not is_prune_channel:
+            if message.author.bot and message.author.id != 196382897366761472:
                 await self._delAfterTime([message])
                 return
-            if re.match(r"^!(help|.{1,17} \d\d?)$"):
+            if re.match(r"^!(help|.{1,17} \d\d?)$", message.content.lower()):
                 await asyncio.sleep(2)
-                msg = await message.channel.send("Please enter bot commands in #bot-stuff")
+                botchannel = message.guild.get_channel(187792525258391552)
+                msg = await message.channel.send(f"Please enter bot commands in {botchannel.mention}")
                 await self._delAfterTime([message, msg])
                 return
         #
@@ -192,8 +194,28 @@ class Ckriscog(commands.Cog):
         del_delay = await self.config.channel(chan).prune_message_delay()
         await message.delete(delay=del_delay)
     #
-    @commands.guild_only()
-    @commands.command()
+    
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+        if before.channel is not None and before.channel.guild.id == 154442858525491201:
+            voice_list = list(before.channel.members)
+            if len(voice_list) == 0:
+                return
+            await asyncio.sleep(5)
+            voice_list = list(before.channel.members)
+            only_bots = True
+            for member in voice_list:
+                #log.info(f"Member: {member.display_name}, bot: {member.bot}")
+                if not member.bot:
+                    only_bots = False
+            #
+            if only_bots:
+                for member in voice_list:
+                    await member.edit(voice_channel=None, reason=f"Removing bots from voice channel with no human members")
+                log.info(f"Removed bots from VC {before.channel.name} after all human members left.")
+    
+    #@commands.guild_only()
+    #@commands.command()
     async def base(self, ctx):
         return
         sender = ctx.author
