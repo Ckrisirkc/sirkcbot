@@ -249,7 +249,7 @@ class Ckriscog(commands.Cog):
             return
         ip = None
         try:
-            ip = requests.get('https://checkip.amazonaws.com').text.strip())
+            ip = requests.get('https://checkip.amazonaws.com').text.strip()
         except Exception as e:
             log.debug(f"ERROR: could not get ip? Exception: {e}")
         if ip is None:
