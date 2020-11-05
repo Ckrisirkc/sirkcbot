@@ -7,6 +7,7 @@ import random
 import lavalink
 import os
 import re
+import requests
 
 log = logging.getLogger('red.ckriscogs')
 
@@ -237,10 +238,24 @@ class Ckriscog(commands.Cog):
         #track = load_result.tracks[0]
         #await lavaplayer.add(sender,track)
         #await lavaplayer.play()
-        
-        
-        
-        
+    #
+    
+    @commands.command(name='whatisip')
+    @checks.is_owner()
+    async def what_is_ip(self, ctx):
+        if isinstance(ctx.channel, discord.abc.PrivateChannel):
+            msg = await ctx.send('Only for use via DM!')
+            await self._delAfterTime([ctx, msg], 10)
+            return
+        ip = None
+        try:
+            ip = requests.get('https://checkip.amazonaws.com').text.strip())
+        except Exception as e:
+            log.debug(f"ERROR: could not get ip? Exception: {e}")
+        if ip is None:
+            ip = '[ERROR: Could not get]'
+        await ctx.channel.send(f"ip addr: {ip}")
+    #
 
     async def check_fuck(self, message: discord.Message):
         if 'fuck' in message.content.lower() and message.guild.id == 154442858525491201 and not message.author.bot:
