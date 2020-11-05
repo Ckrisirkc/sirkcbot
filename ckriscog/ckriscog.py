@@ -243,7 +243,7 @@ class Ckriscog(commands.Cog):
     @commands.command(name='whatisip')
     @checks.is_owner()
     async def what_is_ip(self, ctx):
-        if isinstance(ctx.channel, discord.abc.PrivateChannel):
+        if not isinstance(ctx.channel, discord.abc.PrivateChannel):
             msg = await ctx.send('Only for use via DM!')
             await self._delAfterTime([ctx, msg], 10)
             return
